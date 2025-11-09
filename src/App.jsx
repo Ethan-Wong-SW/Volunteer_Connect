@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate, NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import HomePage from './pages/Home';
 import Login from './pages/Login';
@@ -110,23 +110,79 @@ const navItems = [
 ];
 
 function Header({ onSignOut }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [menuOpen]);
+
+  const handleNavClick = () => {
+    setMenuOpen(false);
+  };
+
   return (
     <header>
       <h1>Volunteer Cupid</h1>
-      <nav>
-        <ul>
-          {navItems.map((item) => (
-            <li key={item.route}>
-              <NavLink to={item.path} className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                {item.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-        <button type="button" className="sign-out" onClick={onSignOut}>
-          Sign Out
+      <div className="header-profile" ref={menuRef}>
+        <button
+          type="button"
+          className="header-avatar-button"
+          aria-haspopup="true"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span className="header-avatar" aria-hidden="true">
+            👤
+          </span>
+          <span className="sr-only">Open navigation menu</span>
         </button>
-      </nav>
+        {menuOpen && (
+          <div className="header-menu" role="menu">
+            <nav>
+              <ul>
+                {navItems.map((item) => (
+                  <li key={item.route}>
+                    <NavLink
+                      to={item.path}
+                      className={({ isActive }) => (isActive ? 'active' : undefined)}
+                      onClick={handleNavClick}
+                    >
+                      {item.label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                className="sign-out"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onSignOut();
+                }}
+              >
+                Sign Out
+              </button>
+            </nav>
+          </div>
+        )}
+      </div>
     </header>
   );
 }
