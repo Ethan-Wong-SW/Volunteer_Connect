@@ -185,3 +185,18 @@
     width: 100%;
   }
 }
+
+.home-card__favorite {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  opacity: 0.6;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.home-card__favorite.active {
+  color: red;
+  opacity: 1;
+}
+

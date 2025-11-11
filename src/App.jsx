@@ -40,7 +40,7 @@ function App() {
 
   const handleLoginSuccess = useCallback(() => {
     setIsAuthenticated(true);
-    navigate('/home', { replace: true });
+    navigate('/opportunities', { replace: true });
   }, [navigate]);
 
   const handleApply = useCallback(
@@ -72,10 +72,10 @@ function App() {
         element={isAuthenticated ? <Navigate to="/home" replace /> : <Login onComplete={handleLoginSuccess} />}
       />
       <Route element={<ProtectedLayout isAuthenticated={isAuthenticated} onSignOut={handleSignOut} />}>
-        <Route path="/home" element={<HomePage />} />
+        <Route path="/home" element={<OpportunitiesPage profile={profile} onApply={handleApply} defaultProfile={DEFAULT_PROFILE} />} />
         <Route
-          path="/opportunities"
-          element={<OpportunitiesPage profile={profile} onApply={handleApply} defaultProfile={DEFAULT_PROFILE} />}
+          path="/favorites"
+          element={<HomePage />}
         />
         <Route
           path="/profile"
@@ -104,8 +104,8 @@ function ProtectedLayout({ isAuthenticated, onSignOut }) {
 }
 
 const navItems = [
-  { route: 'home', label: 'Discover', path: '/home' },
-  { route: 'opportunities', label: 'Opportunities', path: '/opportunities' },
+  { route: 'home', label: 'Discover', path: '/opportunities' },
+  { route: 'opportunities', label: 'Favorites', path: '/favorites' },
   { route: 'profile', label: 'Profile', path: '/profile' },
 ];
 
@@ -141,7 +141,7 @@ function Header({ onSignOut }) {
     <header>
       <h1>
         <NavLink 
-          to="/home" 
+          to="/opportunities" 
           className="logo-link"
           end
         >

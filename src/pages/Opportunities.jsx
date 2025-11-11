@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import './Opportunities.css';
 import { allOpportunities } from '../data/opportunities';
 
@@ -9,6 +9,26 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile }) => {
   const [locationFilter, setLocationFilter] = useState('all');
   const [skillFilter, setSkillFilter] = useState('all');
 
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('favorites')) || [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }, [favorites]);
+
+  const handleToggleFavorite = useCallback((id) => {
+    setFavorites((current) =>
+      current.includes(id)
+        ? current.filter((fav) => fav !== id)
+        : [...current, id]
+    );
+  }, []);
+
   const locations = useMemo(() => Array.from(new Set(allOpportunities.map((item) => item.location))), []);
 
   const skills = useMemo(
@@ -17,10 +37,10 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile }) => {
         new Set(
           allOpportunities
             .flatMap((item) => item.skills || [])
-            .map((skill) => skill.toLowerCase()),
-        ),
+            .map((skill) => skill.toLowerCase())
+        )
       ).sort(),
-    [],
+    []
   );
 
   const filteredOpportunities = useMemo(() => {
@@ -34,7 +54,6 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile }) => {
         opportunity.skills.some((skill) => skill.toLowerCase().includes(normalizedSearch));
 
       const matchesLocation = locationFilter === 'all' || opportunity.location === locationFilter;
-
       const matchesSkill =
         skillFilter === 'all' || opportunity.skills.some((skill) => skill.toLowerCase() === skillFilter);
 
@@ -60,6 +79,7 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile }) => {
             onChange={(event) => setSearchTerm(event.target.value)}
           />
         </label>
+
         <label className="filter-field">
           <span>Location</span>
           <select value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}>
@@ -71,6 +91,7 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile }) => {
             ))}
           </select>
         </label>
+
         <label className="filter-field">
           <span>Skills</span>
           <select value={skillFilter} onChange={(event) => setSkillFilter(event.target.value)}>
@@ -87,7 +108,13 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile }) => {
       <div className="opportunities-list">
         {filteredOpportunities.length ? (
           filteredOpportunities.map((opportunity) => (
-            <OpportunityCard key={opportunity.id} opportunity={opportunity} onApply={onApply} />
+            <OpportunityCard
+              key={opportunity.id}
+              opportunity={opportunity}
+              onApply={onApply}
+              isFavorite={favorites.includes(opportunity.id)}
+              onToggleFavorite={handleToggleFavorite}
+            />
           ))
         ) : (
           <p className="opportunities-empty">No opportunities match your filters right now.</p>
@@ -96,8 +123,7 @@ const Opportunities = ({ profile = {}, onApply, defaultProfile }) => {
     </section>
   );
 };
-
-const OpportunityCard = ({ opportunity, onApply }) => (
+const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite }) => (
   <article className="opportunity-card">
     <div className="opportunity-card__icon" aria-hidden="true">
       <span />
@@ -114,8 +140,15 @@ const OpportunityCard = ({ opportunity, onApply }) => (
         ))}
       </div>
     </div>
-    <button className="opportunity-card__apply" type="button" onClick={() => onApply(opportunity)}>
-      Apply
+
+    <button
+      className={`home-card__favorite${isFavorite ? ' active' : ''}`}
+      type="button"
+      aria-label="Save opportunity"
+      aria-pressed={isFavorite}
+      onClick={() => onToggleFavorite(opportunity.id)}
+    >
+      ♥
     </button>
   </article>
 );
