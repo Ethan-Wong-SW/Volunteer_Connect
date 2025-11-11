@@ -260,7 +260,7 @@ input[type='text'] {
   }
 }
 
-.logo-link.active {
+.logo-link.active, .logo-link {
   text-decoration: none;
   color: inherit;
 }
