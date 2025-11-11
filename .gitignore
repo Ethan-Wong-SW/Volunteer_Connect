@@ -21,7 +21,11 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+*.sw?.venv\Scripts\activate
 picture
 .next
 next-env.d.ts
+
+# env files
+.env*
+/.venv/
