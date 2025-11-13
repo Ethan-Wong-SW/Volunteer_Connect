@@ -28,7 +28,7 @@ const Login = ({ onComplete }) => {
     <section className="login-page">
       <div className="login-card">
         <div className="login-heading">
-          <p className="login-eyebrow">Volunteer Cupid</p>
+          <p className="login-eyebrow">Volunteer Connect</p>
           <h1>Log In</h1>
           <p className="login-subtext">
             For the demo, sign in as <strong>{KNOWN_USER.email}</strong> using password <strong>{KNOWN_USER.password}</strong>.

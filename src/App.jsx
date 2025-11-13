@@ -145,7 +145,7 @@ function Header({ onSignOut }) {
           className="logo-link"
           end
         >
-          Volunteer Cupid
+          Volunteer Connect
         </NavLink>
       </h1>
       <div className="header-profile" ref={menuRef}>
@@ -198,7 +198,7 @@ function Header({ onSignOut }) {
 function Footer() {
   return (
     <footer>
-      <p>© 2025 Volunteer Cupid</p>
+      <p>© 2025 Volunteer Connect</p>
     </footer>
   );
 }
