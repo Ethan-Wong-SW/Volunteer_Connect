@@ -58,6 +58,24 @@ function App() {
     },
     [],
   );
+  const handleQuizComplete = useCallback(
+    (newTags) => {
+      setProfile((currentProfile) => {
+        // Use Set to avoid duplicate tags
+        const combinedInterests = [...new Set([...(currentProfile.interests || []), ...newTags.interests])];
+        const combinedSkills = [...new Set([...(currentProfile.skills || []), ...newTags.skills])];
+        
+        return {
+          ...currentProfile,
+          interests: combinedInterests,
+          skills: combinedSkills,
+        };
+      });
+      // The useEffect for 'profile' will automatically save this to localStorage
+      window.alert('Profile updated with your new interests!');
+    },
+    [] // No dependencies, it uses the setProfile updater function
+  );
 
   const handleSignOut = useCallback(() => {
     setIsAuthenticated(false);
@@ -72,7 +90,17 @@ function App() {
         element={isAuthenticated ? <Navigate to="/home" replace /> : <Login onComplete={handleLoginSuccess} />}
       />
       <Route element={<ProtectedLayout isAuthenticated={isAuthenticated} onSignOut={handleSignOut} />}>
-        <Route path="/home" element={<OpportunitiesPage profile={profile} onApply={handleApply} defaultProfile={DEFAULT_PROFILE} />} />
+        <Route 
+          path="/home" 
+          element={
+            <OpportunitiesPage 
+              profile={profile} 
+              onApply={handleApply} 
+              defaultProfile={DEFAULT_PROFILE}
+              onQuizComplete={handleQuizComplete} // <-- Pass the new handler
+            />
+          } 
+        />
         <Route
           path="/favorites"
           element={<HomePage />}
@@ -85,6 +113,7 @@ function App() {
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
+
 }
 
 function ProtectedLayout({ isAuthenticated, onSignOut }) {

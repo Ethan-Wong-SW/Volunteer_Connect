@@ -5,6 +5,14 @@ const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const STORY_MAX_LENGTH = 280;
 
+// <-- NEW: A re-usable component for the tag
+const Tag = ({ label, onRemove }) => (
+  <button type="button" className="tag" onClick={onRemove}>
+    {label}
+    <span className="tag-remove">&times;</span>
+  </button>
+);
+
 const Profile = ({ profile, onSave, defaultProfile }) => {
   const fallbackProfile = defaultProfile ?? {
     name: 'Guest User',
@@ -15,6 +23,10 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
   const [email, setEmail] = useState(profile.email ?? '');
   const [password, setPassword] = useState(profile.password ?? '');
   const [story, setStory] = useState(profile.story ?? '');
+  // <-- NEW: Add local state for interests and skills
+  const [interests, setInterests] = useState(profile.interests ?? []);
+  const [skills, setSkills] = useState(profile.skills ?? []);
+
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonthOffset, setCalendarMonthOffset] = useState(0);
 
@@ -23,6 +35,9 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
     setEmail(profile.email ?? '');
     setPassword(profile.password ?? '');
     setStory(profile.story ?? '');
+    // <-- NEW: Update tag state when profile prop changes
+    setInterests(profile.interests ?? []);
+    setSkills(profile.skills ?? []);
   }, [profile]);
 
   const upcomingDate =
@@ -81,6 +96,14 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
     }
     return cells;
   }, [displayMonthDate, upcomingDateObj]);
+  // <-- NEW: Handlers to update local tag state
+  const handleRemoveInterest = (interestToRemove) => {
+    setInterests((current) => current.filter((interest) => interest !== interestToRemove));
+  };
+
+  const handleRemoveSkill = (skillToRemove) => {
+    setSkills((current) => current.filter((skill) => skill !== skillToRemove));
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -92,7 +115,9 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
       email: email.trim() || fallbackProfile.email,
       password,
       story: sanitizedStory,
-      interests: Array.isArray(profile.interests) ? profile.interests : fallbackProfile.interests,
+      // <-- UPDATED: Save the local tag state
+      interests: interests, 
+      skills: skills,
     });
   };
 
@@ -248,6 +273,45 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
               placeholder="••••••••"
             />
           </label>
+          {/* --- NEW: Add the Interest Management Section --- */}
+          <div className="tag-management-section">
+            <span className="form-field-label">Your Interests</span>
+            <p className="form-field-description">
+              Tags from the AI quiz appear here. Click a tag to remove it.
+            </p>
+            <div className="tag-container">
+              {interests.length > 0 ? (
+                interests.map((interest) => (
+                  <Tag
+                    key={interest}
+                    label={interest}
+                    onRemove={() => handleRemoveInterest(interest)}
+                  />
+                ))
+              ) : (
+                <p className="empty-message">No interests saved. Try the AI quiz on the Discover page!</p>
+              )}
+            </div>
+          </div>
+
+          {/* --- NEW: Add the Skill Management Section --- */}
+          <div className="tag-management-section">
+            <span className="form-field-label">Your Skills</span>
+            <p className="form-field-description">Click a tag to remove it.</p>
+            <div className="tag-container">
+              {skills.length > 0 ? (
+                skills.map((skill) => (
+                  <Tag
+                    key={skill}
+                    label={skill}
+                    onRemove={() => handleRemoveSkill(skill)}
+                  />
+                ))
+              ) : (
+                <p className="empty-message">No skills saved. Try the AI quiz on the Discover page!</p>
+              )}
+            </div>
+          </div>
 
           <button type="submit" className="profile-save">
             Save profile

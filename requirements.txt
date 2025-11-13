@@ -1,0 +1,8 @@
+#requirements to run the AI backend
+fastapi
+uvicorn[standard]
+transformers
+sentence-transformers
+
+# This line is critical: it forces the CPU-only version of PyTorch
+torch --index-url https://download.pytorch.org/whl/cpu

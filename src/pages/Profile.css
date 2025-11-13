@@ -345,6 +345,70 @@
   box-shadow: 0 10px 20px rgba(76, 175, 80, 0.25);
 }
 
+/* New section for tags inside the form */
+.tag-management-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border: 1px solid #dfe6dd;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.form-field-label {
+  font-weight: 700;
+  color: #2f3c2f;
+  font-size: 0.9rem;
+}
+
+.form-field-description {
+  color: #526052;
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-message {
+  color: #526052;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Tag container */
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Individual tag (re-used from QuizModal) */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #e9f2ea;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  color: #2f3c2f;
+  border: 1px solid #dfe6dd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  background-color: #ffecec; /* Red-ish on hover */
+  border-color: #e06a6a;
+}
+
+.tag-remove {
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: bold;
+  color: #e06a6a;
+}
+
 
 @media (max-width: 600px) {
   .profile-card__header {
