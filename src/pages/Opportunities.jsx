@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import './Opportunities.css';
 import { allOpportunities } from '../data/opportunities';
 import QuizModal from '../components/QuizModal';
@@ -221,7 +222,11 @@ const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite })
         </button>
       </div>
       <div className="opportunity-card__content">
-        <h3>{opportunity.title}</h3>
+        <h3>
+          <Link to={`/opportunities/${opportunity.id}`} className="opportunity-card__title-link">
+            {opportunity.title}
+          </Link>
+        </h3>
         <p className="opportunity-card__org">{organizer}</p>
         <div className="opportunity-card__meta">
           <span className="opportunity-card__meta-item">

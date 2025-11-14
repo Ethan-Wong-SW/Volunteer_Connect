@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import './Home.css';
 
 const nearbyOpportunities = [
@@ -31,7 +30,7 @@ const recentOpportunities = [
   },
 ];
 
-const OpportunityCard = ({ title, summary, date, isFavorite, onToggleFavorite }) => (
+const OpportunityCard = ({ title, summary, date }) => (
   <article className="home-card">
     <div className="home-card__icon" aria-hidden="true">
       <span />
@@ -41,43 +40,10 @@ const OpportunityCard = ({ title, summary, date, isFavorite, onToggleFavorite })
       <p>{summary}</p>
       <p className="home-card__date">{date}</p>
     </div>
-    <button
-      className={`home-card__favorite${isFavorite ? ' active' : ''}`}
-      type="button"
-      aria-label="Save opportunity"
-      aria-pressed={isFavorite}
-      onClick={onToggleFavorite}
-    >
-      ♥
-    </button>
   </article>
 );
 
-const FAVORITES_STORAGE_KEY = 'homeFavoriteOpportunityIds';
-
 const Home = () => {
-  const [favoriteIds, setFavoriteIds] = useState(() => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const stored = window.sessionStorage.getItem(FAVORITES_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch (error) {
-      console.error('Failed to read favorites from sessionStorage', error);
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.sessionStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIds));
-  }, [favoriteIds]);
-
-  const handleToggleFavorite = (id) => {
-    setFavoriteIds((current) =>
-      current.includes(id) ? current.filter((itemId) => itemId !== id) : [...current, id],
-    );
-  };
-
   return (
     <div className="home-shell">
       <header className="home-hero">
@@ -98,8 +64,6 @@ const Home = () => {
               <OpportunityCard
                 key={item.id}
                 {...item}
-                isFavorite={favoriteIds.includes(item.id)}
-                onToggleFavorite={() => handleToggleFavorite(item.id)}
               />
             ))}
           </div>
@@ -117,8 +81,6 @@ const Home = () => {
               <OpportunityCard
                 key={item.id}
                 {...item}
-                isFavorite={favoriteIds.includes(item.id)}
-                onToggleFavorite={() => handleToggleFavorite(item.id)}
               />
             ))}
           </div>

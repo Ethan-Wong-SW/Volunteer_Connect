@@ -114,23 +114,6 @@
   color: #4caf50;
 }
 
-.home-card__favorite {
-  border: none;
-  background: #ffffff;
-  border-radius: 999px;
-  width: 44px;
-  height: 44px;
-  font-size: 1.1rem;
-  color: #e06a6a;
-  cursor: pointer;
-}
-
-.home-card__favorite.active {
-  background: #ffecec;
-  color: #c62828;
-  box-shadow: 0 6px 18px rgba(198, 40, 40, 0.2);
-}
-
 @media (max-width: 640px) {
   .home-card {
     grid-template-columns: 1fr auto;
@@ -139,10 +122,5 @@
   .home-card__icon {
     grid-column: 1 / -1;
     justify-self: flex-start;
-  }
-
-  .home-card__favorite {
-    grid-column: 2;
-    grid-row: 1;
   }
 }

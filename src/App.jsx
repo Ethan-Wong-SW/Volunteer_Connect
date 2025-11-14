@@ -3,6 +3,8 @@ import { Navigate, NavLink, Outlet, Route, Routes, useNavigate } from 'react-rou
 import HomePage from './pages/Home';
 import Login from './pages/Login';
 import OpportunitiesPage from './pages/Opportunities';
+import OpportunityDetailPage from './pages/id/OpportunityDetail';
+import OpportunityReviewsPage from './pages/id/OpportunityReviews';
 import ProfilePage from './pages/Profile';
 
 const DEFAULT_PROFILE = {
@@ -90,16 +92,35 @@ function App() {
         element={isAuthenticated ? <Navigate to="/home" replace /> : <Login onComplete={handleLoginSuccess} />}
       />
       <Route element={<ProtectedLayout isAuthenticated={isAuthenticated} onSignOut={handleSignOut} />}>
-        <Route 
-          path="/home" 
+        <Route
+          path="/home"
           element={
-            <OpportunitiesPage 
-              profile={profile} 
-              onApply={handleApply} 
+            <OpportunitiesPage
+              profile={profile}
+              onApply={handleApply}
               defaultProfile={DEFAULT_PROFILE}
               onQuizComplete={handleQuizComplete} // <-- Pass the new handler
             />
-          } 
+          }
+        />
+        <Route
+          path="/opportunities"
+          element={
+            <OpportunitiesPage
+              profile={profile}
+              onApply={handleApply}
+              defaultProfile={DEFAULT_PROFILE}
+              onQuizComplete={handleQuizComplete}
+            />
+          }
+        />
+        <Route
+          path="/opportunities/:id"
+          element={<OpportunityDetailPage onApply={handleApply} />}
+        />
+        <Route
+          path="/opportunities/:id/reviews"
+          element={<OpportunityReviewsPage />}
         />
         <Route
           path="/favorites"

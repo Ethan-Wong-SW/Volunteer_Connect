@@ -1,0 +1,133 @@
+.opportunity-reviews-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.opportunity-reviews__back {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  color: #5d5d6f;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.35rem 0;
+}
+
+.opportunity-reviews-card {
+  background: #fff;
+  border-radius: 28px;
+  border: 1px solid #e5e7ef;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  box-shadow: 0 25px 55px rgba(27, 36, 71, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.opportunity-reviews-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.opportunity-reviews-card__org {
+  margin: 0 0 0.35rem;
+  color: #7a869a;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.opportunity-reviews-card__header h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  color: #1b2447;
+}
+
+.opportunity-reviews-card__subtitle {
+  margin: 0.35rem 0 0;
+  color: #4a536a;
+  line-height: 1.5;
+}
+
+.opportunity-reviews-card__average {
+  background: #fff5fb;
+  color: #d23d7a;
+  border-radius: 18px;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 700;
+  min-width: 150px;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(210, 61, 122, 0.15);
+}
+
+.opportunity-reviews-card__average span {
+  letter-spacing: 0.1em;
+  font-size: 1rem;
+}
+
+.opportunity-reviews-card__average strong {
+  font-size: 2rem;
+  margin-top: 0.2rem;
+}
+
+.opportunity-reviews-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.opportunity-reviews-card__review {
+  border-radius: 20px;
+  border: 1px solid #f2dced;
+  background: #fffafc;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 15px 35px rgba(210, 61, 122, 0.05);
+}
+
+.opportunity-reviews-card__stars {
+  color: #ffb400;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.opportunity-reviews-card__message {
+  margin: 0;
+  color: #4a536a;
+  line-height: 1.6;
+}
+
+.opportunity-reviews-card__author {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #7a869a;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .opportunity-reviews-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .opportunity-reviews-card__average {
+    width: 100%;
+  }
+}
