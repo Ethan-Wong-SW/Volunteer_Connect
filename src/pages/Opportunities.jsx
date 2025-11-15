@@ -29,6 +29,9 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
 
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('favoritesUpdated'));
+    }
   }, [favorites]);
 
   const handleToggleFavorite = useCallback((id) => {
@@ -133,14 +136,8 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
         <h1>Find the next place to lend a hand.</h1>
         <p>Browse every opportunity currently accepting volunteers and apply when one speaks to you.</p>
         
-        {/* --- NEW: Add the button to open the quiz --- */}
-        <button
-          type="button"
-          className="link-button" // Use your existing style
-          style={{ fontSize: '1.1rem', marginTop: '0.5rem', alignSelf: 'flex-start' }}
-          onClick={() => setIsModalOpen(true)}
-        >
-          ✨ Personalize Your Feed (Take Quiz)
+        <button type="button" className="link-button" onClick={() => setIsModalOpen(true)}>
+          ✨ Personalize your feed (take quiz)
         </button>
       </header>
       
