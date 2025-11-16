@@ -6,6 +6,29 @@ const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const STORY_MAX_LENGTH = 280;
 
+const formatDateKey = (date) => {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+};
+
+const parseDateValue = (value) => {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    const normalized = value.split('T')[0];
+    const parts = normalized.split('-').map((part) => Number(part));
+    if (parts.length === 3 && parts.every((part) => !Number.isNaN(part))) {
+      const [year, month, day] = parts;
+      const parsed = new Date(year, month - 1, day);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    }
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 // <-- NEW: A re-usable component for the tag
 const Tag = ({ label, onRemove }) => (
   <button type="button" className="tag" onClick={onRemove}>
@@ -16,9 +39,11 @@ const Tag = ({ label, onRemove }) => (
 
 const Profile = ({ profile, onSave, defaultProfile }) => {
   const fallbackProfile = defaultProfile ?? {
-    name: 'Guest User',
-    interests: ['Environment'],
-    email: 'volunteer@example.com',
+    name: 'Ben',
+    email: 'ben@mail.com',
+    password: 'test1234',
+    interests: [],
+    skills: [],
   };
   const [name, setName] = useState(profile.name ?? '');
   const [email, setEmail] = useState(profile.email ?? '');
@@ -71,9 +96,51 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
     setSelectedSkill('');
   }, [profile]);
 
-  const upcomingDate =
+  const appliedEvents = useMemo(() => {
+    const entries = Array.isArray(profile.appliedOpportunities) ? profile.appliedOpportunities : [];
+    return entries
+      .map((entry) => {
+        if (!entry?.date) return null;
+        const dateObj = parseDateValue(entry.date);
+        if (!dateObj) return null;
+        return {
+          ...entry,
+          dateObj,
+          dateKey: formatDateKey(dateObj),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+  }, [profile.appliedOpportunities]);
+
+  const nextAppliedEvent = useMemo(() => {
+    if (!appliedEvents.length) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return appliedEvents.find((event) => event.dateObj >= today) ?? appliedEvents[0];
+  }, [appliedEvents]);
+
+  const fallbackDateValue =
     profile.upcomingOpportunity?.date ?? profile.availabilityDate ?? profile.nextOpportunityDate ?? '';
-  const upcomingDateObj = upcomingDate ? new Date(upcomingDate) : null;
+  const fallbackTitle = profile.upcomingOpportunity?.title ?? '';
+  const upcomingDateValue = nextAppliedEvent?.date ?? fallbackDateValue ?? '';
+  const upcomingTitle = nextAppliedEvent?.title ?? fallbackTitle;
+  const upcomingDateObj = useMemo(() => {
+    if (!upcomingDateValue) return null;
+    return parseDateValue(upcomingDateValue);
+  }, [upcomingDateValue]);
+  const upcomingDateKey = upcomingDateObj ? formatDateKey(upcomingDateObj) : '';
+
+  const eventsByDate = useMemo(() => {
+    const map = new Map();
+    appliedEvents.forEach((event) => {
+      if (!map.has(event.dateKey)) {
+        map.set(event.dateKey, []);
+      }
+      map.get(event.dateKey).push(event);
+    });
+    return map;
+  }, [appliedEvents]);
   const calendarBaseDate = useMemo(
     () => (upcomingDateObj ? new Date(upcomingDateObj) : new Date()),
     [upcomingDateObj],
@@ -101,7 +168,17 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
     if (!calendarOpen) {
       setCalendarMonthOffset(0);
     }
-  }, [calendarOpen, upcomingDate]);
+  }, [calendarOpen, upcomingDateKey]);
+
+  const eventsThisMonth = useMemo(
+    () =>
+      appliedEvents.filter(
+        (event) =>
+          event.dateObj.getFullYear() === displayMonthDate.getFullYear() &&
+          event.dateObj.getMonth() === displayMonthDate.getMonth(),
+      ),
+    [appliedEvents, displayMonthDate],
+  );
 
   const calendarCells = useMemo(() => {
     const firstDayOfMonth = new Date(displayMonthDate.getFullYear(), displayMonthDate.getMonth(), 1).getDay();
@@ -112,21 +189,21 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
     }
     for (let day = 1; day <= daysInMonth; day += 1) {
       const cellDate = new Date(displayMonthDate.getFullYear(), displayMonthDate.getMonth(), day);
+      const dateKey = formatDateKey(cellDate);
+      const eventsOnDate = eventsByDate.get(dateKey) ?? [];
+      const isSelected = Boolean(upcomingDateKey && dateKey === upcomingDateKey);
       cells.push({
         key: `day-${day}`,
         label: day,
-        isSelected:
-          upcomingDateObj &&
-          cellDate.getFullYear() === upcomingDateObj.getFullYear() &&
-          cellDate.getMonth() === upcomingDateObj.getMonth() &&
-          cellDate.getDate() === upcomingDateObj.getDate(),
+        isSelected,
+        hasEvents: eventsOnDate.length > 0,
       });
     }
     while (cells.length % 7 !== 0) {
       cells.push(null);
     }
     return cells;
-  }, [displayMonthDate, upcomingDateObj]);
+  }, [displayMonthDate, upcomingDateKey, eventsByDate]);
   // <-- NEW: Handlers to update local tag state
   const handleRemoveInterest = (interestToRemove) => {
     setInterests((current) => current.filter((interest) => interest !== interestToRemove));
@@ -154,13 +231,14 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
     const sanitizedName = name.trim() || fallbackProfile.name;
     const sanitizedStory = story.trim();
     onSave({
+      ...profile,
       name: sanitizedName,
       email: email.trim() || fallbackProfile.email,
       password,
       story: sanitizedStory,
       // <-- UPDATED: Save the local tag state
-      interests: interests, 
-      skills: skills,
+      interests,
+      skills,
     });
   };
 
@@ -224,7 +302,9 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
                       cell ? (
                         <span
                           key={cell.key}
-                          className={`calendar-cell${cell.isSelected ? ' calendar-cell--active' : ''}`}
+                          className={`calendar-cell${cell.hasEvents ? ' calendar-cell--applied' : ''}${
+                            cell.isSelected ? ' calendar-cell--active' : ''
+                          }`}
                           aria-selected={cell.isSelected}
                           role="gridcell"
                         >
@@ -237,9 +317,21 @@ const Profile = ({ profile, onSave, defaultProfile }) => {
                   </div>
                   <p className="calendar-panel__note">
                     {formattedAvailability
-                      ? `You are booked for ${formattedAvailability}.`
+                      ? `You are booked for ${upcomingTitle || 'your next volunteer shift'} on ${formattedAvailability}.`
                       : 'Confirmed volunteering dates will appear here.'}
                   </p>
+                  {eventsThisMonth.length > 0 && (
+                    <ul className="calendar-panel__list">
+                      {eventsThisMonth.map((event) => (
+                        <li key={`${event.id}-${event.date}`}>
+                          <span className="calendar-panel__list-date">
+                            {event.dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          </span>
+                          <span className="calendar-panel__list-title">{event.title}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
             </div>

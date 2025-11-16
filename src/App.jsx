@@ -8,8 +8,11 @@ import OpportunityReviewsPage from './pages/id/OpportunityReviews';
 import ProfilePage from './pages/Profile';
 
 const DEFAULT_PROFILE = {
-  name: 'Guest User',
-  interests: ['environment'],
+  name: 'Ben',
+  email: 'ben@mail.com',
+  password: 'test1234',
+  interests: [],
+  appliedOpportunities: [],
 };
 
 const readProfileFromStorage = () => {
@@ -24,6 +27,9 @@ const readProfileFromStorage = () => {
       ...DEFAULT_PROFILE,
       ...parsed,
       interests: Array.isArray(parsed?.interests) ? parsed.interests : DEFAULT_PROFILE.interests,
+      appliedOpportunities: Array.isArray(parsed?.appliedOpportunities)
+        ? parsed.appliedOpportunities
+        : DEFAULT_PROFILE.appliedOpportunities,
     };
   } catch (error) {
     console.warn('Unable to read profile from storage, falling back to defaults.', error);
@@ -48,7 +54,40 @@ function App() {
   const handleApply = useCallback(
     (opportunity) => {
       const applicant = profile.name || DEFAULT_PROFILE.name;
-      window.alert(`Thanks, ${applicant}! We'll let ${opportunity.title} organizers know you're interested.`);
+      const appliedDate =
+        opportunity.startDate || opportunity.date || new Date().toISOString().split('T')[0];
+
+      setProfile((currentProfile) => {
+        const previousApplications = Array.isArray(currentProfile.appliedOpportunities)
+          ? currentProfile.appliedOpportunities
+          : [];
+        const withoutExisting = previousApplications.filter((item) => item.id !== opportunity.id);
+        const nextEntry = {
+          id: opportunity.id,
+          title: opportunity.title,
+          date: appliedDate,
+          location: opportunity.location,
+          organizer: opportunity.organizer,
+        };
+        const sortedApplications = [...withoutExisting, nextEntry].sort((a, b) => {
+          const aTime = new Date(a.date).getTime();
+          const bTime = new Date(b.date).getTime();
+          if (Number.isNaN(aTime) && Number.isNaN(bTime)) return 0;
+          if (Number.isNaN(aTime)) return 1;
+          if (Number.isNaN(bTime)) return -1;
+          return aTime - bTime;
+        });
+
+        return {
+          ...currentProfile,
+          upcomingOpportunity: nextEntry,
+          appliedOpportunities: sortedApplications,
+        };
+      });
+
+      window.alert(
+        `Thanks, ${applicant}! We'll let ${opportunity.title} organizers know you're interested.`,
+      );
     },
     [profile.name],
   );

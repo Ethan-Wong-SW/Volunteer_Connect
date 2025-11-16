@@ -270,6 +270,11 @@
   background: transparent;
 }
 
+.calendar-cell--applied {
+  background: rgba(76, 175, 80, 0.12);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+}
+
 .calendar-cell--active {
   background: #4caf50;
   color: #ffffff;
@@ -280,6 +285,32 @@
   margin: 0.75rem 0 0;
   font-size: 0.9rem;
   color: #566456;
+}
+
+.calendar-panel__list {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.calendar-panel__list li {
+  display: flex;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #2f3c2f;
+  align-items: center;
+}
+
+.calendar-panel__list-date {
+  font-weight: 600;
+  color: #4caf50;
+}
+
+.calendar-panel__list-title {
+  flex: 1;
 }
 
 .sr-only {
