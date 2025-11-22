@@ -219,7 +219,7 @@ function ProtectedLayout({ isAuthenticated, onSignOut }) {
 
 const navItems = [
   { key: 'discover', label: 'Discover', path: '/opportunities' },
-  { key: 'favorites', label: 'Favorites', path: '/favorites' },
+  { key: 'favorites', label: 'Favourites', path: '/favorites' },
   { key: 'profile', label: 'Profile', path: '/profile' },
 ];
 
