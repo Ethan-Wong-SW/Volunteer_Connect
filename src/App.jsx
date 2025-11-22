@@ -218,9 +218,9 @@ function ProtectedLayout({ isAuthenticated, onSignOut }) {
 }
 
 const navItems = [
-  { route: 'home', label: 'Discover', path: '/opportunities' },
-  { route: 'opportunities', label: 'Favorites', path: '/favorites' },
-  { route: 'profile', label: 'Profile', path: '/profile' },
+  { key: 'discover', label: 'Discover', path: '/opportunities' },
+  { key: 'favorites', label: 'Favorites', path: '/favorites' },
+  { key: 'profile', label: 'Profile', path: '/profile' },
 ];
 
 function Header({ onSignOut }) {
@@ -262,25 +262,48 @@ function Header({ onSignOut }) {
           Volunteer Connect
         </NavLink>
       </h1>
-      <div className="header-profile" ref={menuRef}>
+      <div className="header-actions" ref={menuRef}>
+        <nav className="header-nav">
+          <ul className="header-nav-list">
+            {navItems.map((item) => (
+              <li key={item.key}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) => `header-nav-link${isActive ? ' active' : ''}`}
+                >
+                  {item.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            className="sign-out header-sign-out"
+            onClick={onSignOut}
+          >
+            Sign Out
+          </button>
+        </nav>
         <button
           type="button"
-          className="header-avatar-button"
+          className="header-burger"
           aria-haspopup="true"
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((open) => !open)}
         >
-          <span className="header-avatar" aria-hidden="true">
-            ☰
+          <span className="header-burger-lines" aria-hidden="true">
+            <span />
+            <span />
+            <span />
           </span>
-          <span className="sr-only">Open navigation menu</span>
+          <span className="sr-only">Open navigation</span>
         </button>
         {menuOpen && (
           <div className="header-menu" role="menu">
             <nav>
               <ul>
                 {navItems.map((item) => (
-                  <li key={item.route}>
+                  <li key={item.key}>
                     <NavLink
                       to={item.path}
                       className={({ isActive }) => (isActive ? 'active' : undefined)}
