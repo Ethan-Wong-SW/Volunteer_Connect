@@ -4,6 +4,9 @@ import './Home.css';
 import { allOpportunities } from '../data/opportunities';
 import cardArtwork from '../assets/43180.jpg';
 
+// Bug: Takes two clicks to unfavourite an opportunity instead of one.
+// TODO: Fix this bug.
+
 const formatStartDate = (value) => {
   if (!value) return 'Flexible start';
   const parsed = new Date(value);
