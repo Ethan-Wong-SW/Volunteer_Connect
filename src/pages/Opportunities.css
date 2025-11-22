@@ -274,6 +274,18 @@
   color: #5c6478;
 }
 
+.opportunity-card--clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.opportunity-card--clickable:hover,
+.opportunity-card--clickable:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 38px rgba(17, 52, 95, 0.15);
+  outline: none;
+}
+
 @media (max-width: 640px) {
   .opportunity-card__skills {
     width: 100%;

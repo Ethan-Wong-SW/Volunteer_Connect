@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import { allOpportunities } from '../data/opportunities';
 import cardArtwork from '../assets/43180.jpg';
@@ -39,6 +39,7 @@ const readFavoritesFromStorage = () => {
 const readFavoritesSet = () => new Set(readFavoritesFromStorage());
 
 const FavoriteCard = ({ opportunity, onToggleFavorite }) => {
+  const navigate = useNavigate();
   const organizer = opportunity.organizer || 'Community Partner';
   const dateLabel = formatStartDate(opportunity.startDate || opportunity.date);
   const resolvedSpots = opportunity.spotsLeft;
@@ -48,7 +49,18 @@ const FavoriteCard = ({ opportunity, onToggleFavorite }) => {
       : resolvedSpots || `${Math.max(2, 8 - (opportunity.id % 4))} spots left`;
 
   return (
-    <article className="opportunity-card home-favorite-card">
+    <article
+      className="opportunity-card home-favorite-card opportunity-card--clickable"
+      role="button"
+      tabIndex={0}
+      onClick={() => navigate(`/opportunities/${opportunity.id}`)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          navigate(`/opportunities/${opportunity.id}`);
+        }
+      }}
+    >
       <div className="opportunity-card__media">
         <img src={cardArtwork} alt="" aria-hidden="true" />
         <span className="opportunity-card__badge">{spotsLeft}</span>
@@ -57,17 +69,16 @@ const FavoriteCard = ({ opportunity, onToggleFavorite }) => {
           type="button"
           aria-label="Remove from saved opportunities"
           aria-pressed="true"
-          onClick={() => onToggleFavorite(opportunity.id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleFavorite(opportunity.id);
+          }}
         >
           ♥
         </button>
       </div>
       <div className="opportunity-card__content">
-        <h3>
-          <Link to={`/opportunities/${opportunity.id}`} className="opportunity-card__title-link">
-            {opportunity.title}
-          </Link>
-        </h3>
+        <h3>{opportunity.title}</h3>
         <p className="opportunity-card__org">{organizer}</p>
         <div className="opportunity-card__meta">
           <span className="opportunity-card__meta-item">

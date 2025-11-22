@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Opportunities.css';
 import { allOpportunities } from '../data/opportunities';
 import QuizModal from '../components/QuizModal';
@@ -20,6 +20,7 @@ const normalizeFavoriteId = (value) => {
 };
 
 const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [skillFilter, setSkillFilter] = useState('all');
@@ -217,6 +218,7 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
                 onApply={onApply}
                 isFavorite={favorites.includes(opportunity.id)}
                 onToggleFavorite={handleToggleFavorite}
+                onOpen={() => navigate(`/opportunities/${opportunity.id}`)}
               />
             ))
           ) : (
@@ -235,7 +237,7 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
     </>
   );
 };
-const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite }) => {
+const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite, onOpen }) => {
   const organizer = opportunity.organizer || 'Community Partner';
   const dateLabel = formatStartDate(opportunity.startDate || opportunity.date);
   const resolvedSpots = opportunity.spotsLeft;
@@ -244,8 +246,24 @@ const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite })
       ? `${resolvedSpots} spots left`
       : resolvedSpots || `${Math.max(2, 8 - (opportunity.id % 4))} spots left`;
 
+  const handleCardClick = (event) => {
+    if (event.target.closest('button')) return;
+    onOpen?.();
+  };
+
   return (
-    <article className="opportunity-card">
+    <article
+      className="opportunity-card opportunity-card--clickable"
+      role="button"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleCardClick(event);
+        }
+      }}
+    >
       <div className="opportunity-card__media">
         <img src={cardArtwork} alt="" aria-hidden="true" />
         <span className="opportunity-card__badge">{spotsLeft}</span>
@@ -254,17 +272,16 @@ const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite })
           type="button"
           aria-label={isFavorite ? 'Remove from saved opportunities' : 'Save opportunity'}
           aria-pressed={isFavorite}
-          onClick={() => onToggleFavorite(opportunity.id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleFavorite(opportunity.id);
+          }}
         >
           ♥
         </button>
       </div>
       <div className="opportunity-card__content">
-        <h3>
-          <Link to={`/opportunities/${opportunity.id}`} className="opportunity-card__title-link">
-            {opportunity.title}
-          </Link>
-        </h3>
+        <h3>{opportunity.title}</h3>
         <p className="opportunity-card__org">{organizer}</p>
         <div className="opportunity-card__meta">
           <span className="opportunity-card__meta-item">
