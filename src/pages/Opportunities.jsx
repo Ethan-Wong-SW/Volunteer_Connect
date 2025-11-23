@@ -24,6 +24,8 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [skillFilter, setSkillFilter] = useState('all');
+  const [interestFilter, setInterestFilter] = useState('all');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -77,39 +79,56 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
     [],
   );
 
-  const { skills, skillLabelMap } = useMemo(() => {
+  // <-- UPDATED: Extract Skills AND Interests for dropdowns
+  const { skills, skillLabelMap, uniqueInterests } = useMemo(() => {
     const labelMap = new Map();
+    const interestSet = new Set();
 
-    allOpportunities
-      .flatMap((item) => item.skills || [])
-      .forEach((skill) => {
+    allOpportunities.forEach((item) => {
+      // Process Skills
+      (item.skills || []).forEach((skill) => {
         const normalized = skill.toLowerCase();
         if (!labelMap.has(normalized)) {
           labelMap.set(normalized, skill);
         }
       });
+      // Process Interests
+      (item.interests || []).forEach((int) => {
+        interestSet.add(int); // Keep original case for display
+      });
+    });
 
     const uniqueSkills = Array.from(labelMap.keys()).sort();
-    return { skills: uniqueSkills, skillLabelMap: labelMap };
+    // Sort interests alphabetically
+    const sortedInterests = Array.from(interestSet).sort((a, b) => a.localeCompare(b));
+
+    return { skills: uniqueSkills, skillLabelMap: labelMap, uniqueInterests: sortedInterests };
   }, []);
 
+  // Logic to auto-select skill filter based on profile (optional)
   useEffect(() => {
     const profileSkills = (profile.skills || []).map((skill) => skill.toLowerCase());
     if (!profileSkills.length) return;
-    const matchedSkill = profileSkills.find((skill) => skills.includes(skill));
-    if (matchedSkill) {
-      setSkillFilter(matchedSkill);
+    // Only auto-set if filter is currently 'all' to avoid overriding user choice
+    if (skillFilter === 'all') { 
+        const matchedSkill = profileSkills.find((skill) => skills.includes(skill));
+        if (matchedSkill) {
+        setSkillFilter(matchedSkill);
+        }
     }
-  }, [profile.skills, skills]);
+  }, [profile.skills, skills, skillFilter]);
 
-  const filteredOpportunities = useMemo(() => {
+const filteredOpportunities = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const normalizedUserInterests = (profile.interests || []).map((interest) => interest.toLowerCase());
+    const normalizedUserSkills = (profile.skills || []).map((s) => s.toLowerCase());
+    
     const userInterestSet = new Set(normalizedUserInterests);
 
     const scored = allOpportunities
       .map((opportunity, index) => ({ opportunity, index }))
       .filter(({ opportunity }) => {
+        // 1. Search Filter
         const matchesSearch =
           !normalizedSearch ||
           opportunity.title.toLowerCase().includes(normalizedSearch) ||
@@ -118,20 +137,73 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
 
         if (!matchesSearch) return false;
 
+        // 2. Location Filter
         const matchesLocation = locationFilter === 'all' || opportunity.location === locationFilter;
+        
+        // 3. Skill Filter (Dropdown)
         const matchesSkill =
           skillFilter === 'all' || opportunity.skills.some((skill) => skill.toLowerCase() === skillFilter);
 
-        return matchesLocation && matchesSkill;
+        // 4. <-- NEW: Interest Filter (Dropdown)
+        const matchesInterestFilter = 
+          interestFilter === 'all' || opportunity.interests.some(i => i.toLowerCase() === interestFilter.toLowerCase());
+
+        // 5. <-- NEW: Date Filter
+        // Logic: Show opportunities starting ON or AFTER the selected date
+        let matchesDate = true;
+        const oppDateString = opportunity.date || opportunity.startDate;
+        
+        if (oppDateString) {
+            const oppDate = new Date(oppDateString);
+            
+            if (!Number.isNaN(oppDate.getTime())) {
+                // FIX: Reset time to 00:00:00 immediately.
+                // This ensures we compare strictly by Date, ignoring Time/Timezones.
+                oppDate.setHours(0, 0, 0, 0);
+
+                // Check Start Date
+                if (dateRange.start) {
+                    const startDate = new Date(dateRange.start);
+                    startDate.setHours(0, 0, 0, 0);
+                    if (oppDate < startDate) matchesDate = false;
+                }
+
+                // Check End Date
+                if (matchesDate && dateRange.end) {
+                    const endDate = new Date(dateRange.end);
+                    endDate.setHours(0, 0, 0, 0);
+                    // Logic: If opportunity is AFTER the selected end date, hide it.
+                    if (oppDate > endDate) matchesDate = false;
+                }
+            }
+        }
+
+        // 6. AI Profile Matching (OR Logic)
+        let matchesProfile = true;
+        // Only apply if user has profile tags AND hasn't manually overridden with dropdowns
+        // (Adjust this logic if you want profile matching to always apply)
+        const hasManualFilters = skillFilter !== 'all' || interestFilter !== 'all' || dateRange !== '' || locationFilter !== 'all' || searchTerm !== '';
+        
+        if (!hasManualFilters && (normalizedUserInterests.length > 0 || normalizedUserSkills.length > 0)) {
+             const hasInterestMatch = opportunity.interests?.some(i => normalizedUserInterests.includes(i.toLowerCase()));
+             const hasSkillMatch = opportunity.skills?.some(s => normalizedUserSkills.includes(s.toLowerCase()));
+             matchesProfile = hasInterestMatch || hasSkillMatch;
+        } else if (!hasManualFilters && normalizedUserInterests.length === 0 && normalizedUserSkills.length === 0) {
+            // If no profile and no manual filters, show all
+            matchesProfile = true;
+        }
+
+        return matchesLocation && matchesSkill && matchesInterestFilter && matchesDate && matchesProfile;
       })
       .map(({ opportunity, index }) => {
+        // Scoring logic for sorting (unchanged)
         const opportunityInterests = (opportunity.interests || []).map((interest) => interest.toLowerCase());
         const overlap = opportunityInterests.filter((interest) => userInterestSet.has(interest));
         const hasAll = normalizedUserInterests.length > 0 && normalizedUserInterests.every((interest) =>
           opportunityInterests.includes(interest),
         );
         const category = normalizedUserInterests.length === 0
-          ? 1 // keep middle bucket when user has no interests
+          ? 1
           : hasAll
             ? 0
             : overlap.length > 0
@@ -153,11 +225,11 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
       if (b.overlapCount !== a.overlapCount) {
         return b.overlapCount - a.overlapCount;
       }
-      return a.index - b.index; // keep original ordering inside identical groups
+      return a.index - b.index;
     });
 
     return scored.map(({ opportunity }) => opportunity);
-  }, [searchTerm, locationFilter, skillFilter, profile.interests]);
+  }, [searchTerm, locationFilter, skillFilter, interestFilter, dateRange, profile.interests, profile.skills]);
 
   return (
     <>
@@ -166,11 +238,26 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
           <p className="eyebrow">All opportunities</p>
           <h1>Find the next place to lend a hand.</h1>
           <p>Browse every opportunity currently accepting volunteers and apply when one speaks to you.</p>
-          
-          <button type="button" className="link-button" onClick={() => setIsModalOpen(true)}>
-            ✨ Personalise your feed (take quiz)
-          </button>
         </header>
+        {/* --- NEW VISUAL CALLOUT SECTION --- */}
+        <div className="quiz-callout">
+          <div className="quiz-callout__content">
+            <div className="quiz-callout__icon">
+              ✨
+            </div>
+            <div className="quiz-callout__text">
+              <h3>Ready to find your perfect match?</h3>
+              <p>Take our 1-minute quiz to personalize your feed based on your unique skills and interests.</p>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            className="quiz-callout__button" 
+            onClick={() => setIsModalOpen(true)}
+          >
+            Take the Quiz
+          </button>
+        </div>
         
         <div className="opportunities-filters" role="search">
           <label className="filter-field">
@@ -206,6 +293,39 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
                 );
               })}
             </select>
+          </label>
+          {/* <-- NEW: Interests Filter --> */}
+          <label className="filter-field">
+            <span>Interests</span>
+            <select value={interestFilter} onChange={(event) => setInterestFilter(event.target.value)}>
+              <option value="all">All interests</option>
+              {uniqueInterests.map((interest) => (
+                <option key={interest} value={interest}>
+                  {interest}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* Date Range Filters */}
+          <label className="filter-field">
+            <span>From</span>
+            <input 
+                type="date" 
+                value={dateRange.start} 
+                onChange={(event) => setDateRange(prev => ({ ...prev, start: event.target.value }))}
+                style={{ fontFamily: 'inherit' }} 
+            />
+          </label>
+          
+          <label className="filter-field">
+            <span>To</span>
+            <input 
+                type="date" 
+                value={dateRange.end} 
+                onChange={(event) => setDateRange(prev => ({ ...prev, end: event.target.value }))}
+                style={{ fontFamily: 'inherit' }} 
+            />
           </label>
         </div>
 

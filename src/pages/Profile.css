@@ -480,6 +480,37 @@
   color: #e06a6a;
 }
 
+/* New container to hold the Save and Clear buttons */
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+/* The Clear All button style */
+.profile-clear-all {
+  border: 1px solid #e06a6a; /* Red border */
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.7rem 1.25rem;
+  font-weight: 600;
+  color: #e06a6a; /* Red text */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.profile-clear-all:hover {
+  background: #fff5f5; /* Light red background on hover */
+  transform: translateY(-1px);
+}
+
+/* Adjust the existing profile-save to ensure it doesn't stretch oddly */
+.profile-save {
+  align-self: auto; /* Reset the previous 'flex-start' alignment */
+}
 
 @media (max-width: 600px) {
   .profile-card__header {

@@ -286,8 +286,100 @@
   outline: none;
 }
 
+
 @media (max-width: 640px) {
   .opportunity-card__skills {
+    width: 100%;
+  }
+}
+
+/* --- Add to src/pages/Opportunities.css --- */
+
+.quiz-callout {
+  background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+  border: 1px solid #c8e6c9;
+  border-left: 5px solid #4caf50; /* Accent bar to draw attention */
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quiz-callout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(76, 175, 80, 0.15);
+}
+
+.quiz-callout__content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1 1 300px; /* Allow it to grow/shrink properly */
+}
+
+.quiz-callout__icon {
+  font-size: 2.5rem;
+  background: #ffffff;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.quiz-callout__text h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  color: #2f3c2f;
+}
+
+.quiz-callout__text p {
+  margin: 0;
+  color: #526052;
+  font-size: 0.95rem;
+}
+
+.quiz-callout__button {
+  background-color: #4caf50;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.85rem 2rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  transition: all 0.2s ease;
+}
+
+.quiz-callout__button:hover {
+  background-color: #43a047;
+  box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+  transform: scale(1.02);
+}
+
+/* Mobile adjustment */
+@media (max-width: 600px) {
+  .quiz-callout {
+    flex-direction: column;
+    text-align: center;
+    align-items: stretch;
+  }
+  
+  .quiz-callout__content {
+    flex-direction: column;
+  }
+  
+  .quiz-callout__button {
     width: 100%;
   }
 }
