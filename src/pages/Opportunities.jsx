@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Opportunities.css';
 import { allOpportunities } from '../data/opportunities';
 import QuizModal from '../components/QuizModal';
@@ -14,14 +14,24 @@ const formatStartDate = (value) => {
   return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
+const normalizeFavoriteId = (value) => {
+  const asNumber = Number(value);
+  return Number.isNaN(asNumber) ? value : asNumber;
+};
+
 const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [skillFilter, setSkillFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const snackbarTimerRef = useRef(null);
   const [favorites, setFavorites] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('favorites')) || [];
+      const parsed = JSON.parse(localStorage.getItem('favorites')) || [];
+      return Array.from(new Set((Array.isArray(parsed) ? parsed : []).map((value) => normalizeFavoriteId(value))));
     } catch {
       return [];
     }
@@ -35,11 +45,31 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
   }, [favorites]);
 
   const handleToggleFavorite = useCallback((id) => {
-    setFavorites((current) =>
-      current.includes(id)
-        ? current.filter((fav) => fav !== id)
-        : [...current, id]
-    );
+    const idValue = normalizeFavoriteId(id);
+    setFavorites((current) => {
+      const normalizedCurrent = current.map(normalizeFavoriteId);
+      const isFavorited = normalizedCurrent.includes(idValue);
+      const next = isFavorited
+        ? normalizedCurrent.filter((fav) => fav !== idValue)
+        : [...normalizedCurrent, idValue];
+      if (snackbarTimerRef.current) {
+        clearTimeout(snackbarTimerRef.current);
+      }
+      setSnackbarMessage(isFavorited ? 'Removed from favourites' : 'Added to favourites');
+      setSnackbarVisible(true);
+      snackbarTimerRef.current = setTimeout(() => {
+        setSnackbarVisible(false);
+        snackbarTimerRef.current = null;
+      }, 2500);
+
+      return Array.from(new Set(next));
+    });
+  }, []);
+
+  useEffect(() => () => {
+    if (snackbarTimerRef.current) {
+      clearTimeout(snackbarTimerRef.current);
+    }
   }, []);
 
   const locations = useMemo(
@@ -130,78 +160,84 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
   }, [searchTerm, locationFilter, skillFilter, profile.interests]);
 
   return (
-    <section className="opportunities-shell">
-      <header className="opportunities-hero">
-        <p className="eyebrow">All opportunities</p>
-        <h1>Find the next place to lend a hand.</h1>
-        <p>Browse every opportunity currently accepting volunteers and apply when one speaks to you.</p>
+    <>
+      <section className="opportunities-shell">
+        <header className="opportunities-hero">
+          <p className="eyebrow">All opportunities</p>
+          <h1>Find the next place to lend a hand.</h1>
+          <p>Browse every opportunity currently accepting volunteers and apply when one speaks to you.</p>
+          
+          <button type="button" className="link-button" onClick={() => setIsModalOpen(true)}>
+            ✨ Personalise your feed (take quiz)
+          </button>
+        </header>
         
-        <button type="button" className="link-button" onClick={() => setIsModalOpen(true)}>
-          ✨ Personalize your feed (take quiz)
-        </button>
-      </header>
-      
-      <div className="opportunities-filters" role="search">
-        <label className="filter-field">
-          <span>Search</span>
-          <input
-            type="search"
-            placeholder="Role, skill, cause…"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
-        </label>
-        <label className="filter-field">
-          <span>Location</span>
-          <select value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}>
-            <option value="all">All locations</option>
-            {locations.map((location) => (
-              <option key={location} value={location}>
-                {location}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="filter-field">
-          <span>Skills</span>
-          <select value={skillFilter} onChange={(event) => setSkillFilter(event.target.value)}>
-            <option value="all">All skills</option>
-            {skills.map((skill) => {
-              const label = skillLabelMap.get(skill) ?? skill.replace(/(^\w|\s\w)/g, (s) => s.toUpperCase());
-              return (
-                <option key={skill} value={skill}>
-                  {label}
-                </option>
-              );
-            })}
-          </select>
-        </label>
-      </div>
-
-      <div className="opportunities-list">
-        {filteredOpportunities.length ? (
-          filteredOpportunities.map((opportunity) => (
-            <OpportunityCard
-              key={opportunity.id}
-              opportunity={opportunity}
-              onApply={onApply}
-              isFavorite={favorites.includes(opportunity.id)}
-              onToggleFavorite={handleToggleFavorite}
+        <div className="opportunities-filters" role="search">
+          <label className="filter-field">
+            <span>Search</span>
+            <input
+              type="search"
+              placeholder="Role, skill, cause…"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
             />
-          ))
-        ) : (
-          <p className="opportunities-empty">No opportunities match your filters right now.</p>
-        )}
+          </label>
+          <label className="filter-field">
+            <span>Location</span>
+            <select value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}>
+              <option value="all">All locations</option>
+              {locations.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="filter-field">
+            <span>Skills</span>
+            <select value={skillFilter} onChange={(event) => setSkillFilter(event.target.value)}>
+              <option value="all">All skills</option>
+              {skills.map((skill) => {
+                const label = skillLabelMap.get(skill) ?? skill.replace(/(^\w|\s\w)/g, (s) => s.toUpperCase());
+                return (
+                  <option key={skill} value={skill}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+        </div>
+
+        <div className="opportunities-list">
+          {filteredOpportunities.length ? (
+            filteredOpportunities.map((opportunity) => (
+              <OpportunityCard
+                key={opportunity.id}
+                opportunity={opportunity}
+                onApply={onApply}
+                isFavorite={favorites.includes(opportunity.id)}
+                onToggleFavorite={handleToggleFavorite}
+                onOpen={() => navigate(`/opportunities/${opportunity.id}`)}
+              />
+            ))
+          ) : (
+            <p className="opportunities-empty">No opportunities match your filters right now.</p>
+          )}
+        </div>
+        <QuizModal 
+          show={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onComplete={onQuizComplete} // This passes the tags up to App.jsx
+        />
+      </section>
+      <div className={`snackbar${snackbarVisible ? ' visible' : ''}`} role="status" aria-live="polite">
+        {snackbarMessage}
       </div>
-      <QuizModal 
-        show={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onComplete={onQuizComplete} // This passes the tags up to App.jsx
-      />
-    </section>
+    </>
   );
 };
-const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite }) => {
+const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite, onOpen }) => {
   const organizer = opportunity.organizer || 'Community Partner';
   const dateLabel = formatStartDate(opportunity.startDate || opportunity.date);
   const resolvedSpots = opportunity.spotsLeft;
@@ -210,8 +246,24 @@ const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite })
       ? `${resolvedSpots} spots left`
       : resolvedSpots || `${Math.max(2, 8 - (opportunity.id % 4))} spots left`;
 
+  const handleCardClick = (event) => {
+    if (event.target.closest('button')) return;
+    onOpen?.();
+  };
+
   return (
-    <article className="opportunity-card">
+    <article
+      className="opportunity-card opportunity-card--clickable"
+      role="button"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleCardClick(event);
+        }
+      }}
+    >
       <div className="opportunity-card__media">
         <img src={cardArtwork} alt="" aria-hidden="true" />
         <span className="opportunity-card__badge">{spotsLeft}</span>
@@ -220,17 +272,16 @@ const OpportunityCard = ({ opportunity, onApply, isFavorite, onToggleFavorite })
           type="button"
           aria-label={isFavorite ? 'Remove from saved opportunities' : 'Save opportunity'}
           aria-pressed={isFavorite}
-          onClick={() => onToggleFavorite(opportunity.id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleFavorite(opportunity.id);
+          }}
         >
           ♥
         </button>
       </div>
       <div className="opportunity-card__content">
-        <h3>
-          <Link to={`/opportunities/${opportunity.id}`} className="opportunity-card__title-link">
-            {opportunity.title}
-          </Link>
-        </h3>
+        <h3>{opportunity.title}</h3>
         <p className="opportunity-card__org">{organizer}</p>
         <div className="opportunity-card__meta">
           <span className="opportunity-card__meta-item">
