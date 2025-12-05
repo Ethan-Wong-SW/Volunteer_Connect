@@ -106,9 +106,6 @@ header h1 {
   align-items: center;
   justify-content: center;
   padding: 0.55rem 1rem;
-  border-radius: 999px;
-  border: 1px solid #dfe6dd;
-  background: linear-gradient(120deg, #f7fff8 0%, #eef7ef 100%);
   color: #445744;
   text-decoration: none;
   font-weight: 700;
@@ -119,16 +116,12 @@ header h1 {
 .header-nav-link:hover,
 .header-nav-link:focus-visible {
   color: #2f6b34;
-  border-color: #c4e3c8;
-  box-shadow: 0 12px 30px rgba(76, 175, 80, 0.14);
   transform: translateY(-1px);
   outline: none;
 }
 
 .header-nav-link.active {
   color: #2f6b34;
-  border-color: #4caf50;
-  box-shadow: 0 14px 35px rgba(76, 175, 80, 0.22);
   background: #ffffff;
 }
 
@@ -337,4 +330,34 @@ input[type='text'] {
 .logo-link.active, .logo-link {
   text-decoration: none;
   color: inherit;
+}
+
+.opportunities-section-title {
+  width: 100%;
+  display: block;
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 48px;
+}
+
+.opportunities-see-all-container {
+  width: 100%;
+  grid-column: 1 / -1; /* Force full width across grid */
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.opportunities-see-all-btn {
+  width: 300px;
+  display: block;
+  background-color: #4caf50;
+  color: #ffffff;
+  border: none;
+  padding: 0.85rem 2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
 }
