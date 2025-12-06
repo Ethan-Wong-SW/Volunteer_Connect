@@ -19,7 +19,7 @@ const normalizeFavoriteId = (value) => {
   return Number.isNaN(asNumber) ? value : asNumber;
 };
 
-const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
+const Opportunities = ({ profile = {}, onApply, onQuizComplete, onClearProfile }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
@@ -30,6 +30,7 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const snackbarTimerRef = useRef(null);
+  const [showAllOpportunities, setShowAllOpportunities] = useState(false);
   const [favorites, setFavorites] = useState(() => {
     try {
       const parsed = JSON.parse(localStorage.getItem('favorites')) || [];
@@ -38,6 +39,9 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
       return [];
     }
   });
+
+  // Check if user has completed the quiz
+  const hasCompletedQuiz = !!(profile.skills?.length > 0 || profile.interests?.length > 0);
 
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -79,51 +83,35 @@ const Opportunities = ({ profile = {}, onApply, onQuizComplete }) => {
     [],
   );
 
-  // <-- UPDATED: Extract Skills AND Interests for dropdowns
   const { skills, skillLabelMap, uniqueInterests } = useMemo(() => {
     const labelMap = new Map();
     const interestSet = new Set();
 
     allOpportunities.forEach((item) => {
-      // Process Skills
       (item.skills || []).forEach((skill) => {
         const normalized = skill.toLowerCase();
         if (!labelMap.has(normalized)) {
           labelMap.set(normalized, skill);
         }
       });
-      // Process Interests
       (item.interests || []).forEach((int) => {
-        interestSet.add(int); // Keep original case for display
+        interestSet.add(int);
       });
     });
 
     const uniqueSkills = Array.from(labelMap.keys()).sort();
-    // Sort interests alphabetically
     const sortedInterests = Array.from(interestSet).sort((a, b) => a.localeCompare(b));
 
     return { skills: uniqueSkills, skillLabelMap: labelMap, uniqueInterests: sortedInterests };
   }, []);
 
-  // Logic to auto-select skill filter based on profile (optional)
-  useEffect(() => {
-    const profileSkills = (profile.skills || []).map((skill) => skill.toLowerCase());
-    if (!profileSkills.length) return;
-    // Only auto-set if filter is currently 'all' to avoid overriding user choice
-    if (skillFilter === 'all') { 
-        const matchedSkill = profileSkills.find((skill) => skills.includes(skill));
-        if (matchedSkill) {
-        setSkillFilter(matchedSkill);
-        }
-    }
-  }, [profile.skills, skills, skillFilter]);
-
-const filteredOpportunities = useMemo(() => {
+  const filteredOpportunities = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const normalizedUserInterests = (profile.interests || []).map((interest) => interest.toLowerCase());
     const normalizedUserSkills = (profile.skills || []).map((s) => s.toLowerCase());
-    
+
     const userInterestSet = new Set(normalizedUserInterests);
+    const userSkillSet = new Set(normalizedUserSkills);
 
     const scored = allOpportunities
       .map((opportunity, index) => ({ opportunity, index }))
@@ -139,97 +127,82 @@ const filteredOpportunities = useMemo(() => {
 
         // 2. Location Filter
         const matchesLocation = locationFilter === 'all' || opportunity.location === locationFilter;
-        
+
         // 3. Skill Filter (Dropdown)
         const matchesSkill =
           skillFilter === 'all' || opportunity.skills.some((skill) => skill.toLowerCase() === skillFilter);
 
-        // 4. <-- NEW: Interest Filter (Dropdown)
-        const matchesInterestFilter = 
+        // 4. Interest Filter (Dropdown)
+        const matchesInterestFilter =
           interestFilter === 'all' || opportunity.interests.some(i => i.toLowerCase() === interestFilter.toLowerCase());
 
-        // 5. <-- NEW: Date Filter
-        // Logic: Show opportunities starting ON or AFTER the selected date
+        // 5. Date Filter
         let matchesDate = true;
         const oppDateString = opportunity.date || opportunity.startDate;
-        
+
         if (oppDateString) {
-            const oppDate = new Date(oppDateString);
-            
-            if (!Number.isNaN(oppDate.getTime())) {
-                // FIX: Reset time to 00:00:00 immediately.
-                // This ensures we compare strictly by Date, ignoring Time/Timezones.
-                oppDate.setHours(0, 0, 0, 0);
+          const oppDate = new Date(oppDateString);
 
-                // Check Start Date
-                if (dateRange.start) {
-                    const startDate = new Date(dateRange.start);
-                    startDate.setHours(0, 0, 0, 0);
-                    if (oppDate < startDate) matchesDate = false;
-                }
+          if (!Number.isNaN(oppDate.getTime())) {
+            oppDate.setHours(0, 0, 0, 0);
 
-                // Check End Date
-                if (matchesDate && dateRange.end) {
-                    const endDate = new Date(dateRange.end);
-                    endDate.setHours(0, 0, 0, 0);
-                    // Logic: If opportunity is AFTER the selected end date, hide it.
-                    if (oppDate > endDate) matchesDate = false;
-                }
+            if (dateRange.start) {
+              const startDate = new Date(dateRange.start);
+              startDate.setHours(0, 0, 0, 0);
+              if (oppDate < startDate) matchesDate = false;
             }
+
+            if (matchesDate && dateRange.end) {
+              const endDate = new Date(dateRange.end);
+              endDate.setHours(0, 0, 0, 0);
+              if (oppDate > endDate) matchesDate = false;
+            }
+          }
         }
 
-        // 6. AI Profile Matching (OR Logic)
-        let matchesProfile = true;
-        // Only apply if user has profile tags AND hasn't manually overridden with dropdowns
-        // (Adjust this logic if you want profile matching to always apply)
-        const hasManualFilters = skillFilter !== 'all' || interestFilter !== 'all' || dateRange !== '' || locationFilter !== 'all' || searchTerm !== '';
-        
-        if (!hasManualFilters && (normalizedUserInterests.length > 0 || normalizedUserSkills.length > 0)) {
-             const hasInterestMatch = opportunity.interests?.some(i => normalizedUserInterests.includes(i.toLowerCase()));
-             const hasSkillMatch = opportunity.skills?.some(s => normalizedUserSkills.includes(s.toLowerCase()));
-             matchesProfile = hasInterestMatch || hasSkillMatch;
-        } else if (!hasManualFilters && normalizedUserInterests.length === 0 && normalizedUserSkills.length === 0) {
-            // If no profile and no manual filters, show all
-            matchesProfile = true;
-        }
-
-        return matchesLocation && matchesSkill && matchesInterestFilter && matchesDate && matchesProfile;
+        return matchesLocation && matchesSkill && matchesInterestFilter && matchesDate;
       })
       .map(({ opportunity, index }) => {
-        // Scoring logic for sorting (unchanged)
+        // Scoring logic for sorting
         const opportunityInterests = (opportunity.interests || []).map((interest) => interest.toLowerCase());
-        const overlap = opportunityInterests.filter((interest) => userInterestSet.has(interest));
-        const hasAll = normalizedUserInterests.length > 0 && normalizedUserInterests.every((interest) =>
-          opportunityInterests.includes(interest),
-        );
-        const category = normalizedUserInterests.length === 0
-          ? 1
-          : hasAll
-            ? 0
-            : overlap.length > 0
-              ? 1
-              : 2;
+        const interestOverlap = opportunityInterests.filter((interest) => userInterestSet.has(interest)).length;
+
+        const opportunitySkills = (opportunity.skills || []).map((skill) => skill.toLowerCase());
+        const skillOverlap = opportunitySkills.filter((skill) => userSkillSet.has(skill)).length;
 
         return {
           opportunity,
           index,
-          category,
-          overlapCount: overlap.length,
+          interestOverlap,
+          skillOverlap,
         };
       });
 
     scored.sort((a, b) => {
-      if (a.category !== b.category) {
-        return a.category - b.category;
+      // Priority 1: Interest Overlap
+      if (b.interestOverlap !== a.interestOverlap) {
+        return b.interestOverlap - a.interestOverlap;
       }
-      if (b.overlapCount !== a.overlapCount) {
-        return b.overlapCount - a.overlapCount;
+      // Priority 2: Skill Overlap
+      if (b.skillOverlap !== a.skillOverlap) {
+        return b.skillOverlap - a.skillOverlap;
       }
       return a.index - b.index;
     });
 
     return scored.map(({ opportunity }) => opportunity);
   }, [searchTerm, locationFilter, skillFilter, interestFilter, dateRange, profile.interests, profile.skills]);
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setLocationFilter('all');
+    setSkillFilter('all');
+    setInterestFilter('all');
+    setDateRange({ start: '', end: '' });
+    if (onClearProfile) onClearProfile();
+  };
+
+
 
   return (
     <>
@@ -239,7 +212,7 @@ const filteredOpportunities = useMemo(() => {
           <h1>Find the next place to lend a hand.</h1>
           <p>Browse every opportunity currently accepting volunteers and apply when one speaks to you.</p>
         </header>
-        {/* --- NEW VISUAL CALLOUT SECTION --- */}
+
         <div className="quiz-callout">
           <div className="quiz-callout__content">
             <div className="quiz-callout__icon">
@@ -250,15 +223,15 @@ const filteredOpportunities = useMemo(() => {
               <p>Take our 1-minute quiz to personalize your feed based on your unique skills and interests.</p>
             </div>
           </div>
-          <button 
-            type="button" 
-            className="quiz-callout__button" 
+          <button
+            type="button"
+            className="quiz-callout__button"
             onClick={() => setIsModalOpen(true)}
           >
             Take the Quiz
           </button>
         </div>
-        
+
         <div className="opportunities-filters" role="search">
           <label className="filter-field">
             <span>Search</span>
@@ -294,7 +267,6 @@ const filteredOpportunities = useMemo(() => {
               })}
             </select>
           </label>
-          {/* <-- NEW: Interests Filter --> */}
           <label className="filter-field">
             <span>Interests</span>
             <select value={interestFilter} onChange={(event) => setInterestFilter(event.target.value)}>
@@ -307,48 +279,89 @@ const filteredOpportunities = useMemo(() => {
             </select>
           </label>
 
-          {/* Date Range Filters */}
           <label className="filter-field">
             <span>From</span>
-            <input 
-                type="date" 
-                value={dateRange.start} 
-                onChange={(event) => setDateRange(prev => ({ ...prev, start: event.target.value }))}
-                style={{ fontFamily: 'inherit' }} 
+            <input
+              type="date"
+              value={dateRange.start}
+              onChange={(event) => setDateRange(prev => ({ ...prev, start: event.target.value }))}
+              style={{ fontFamily: 'inherit' }}
             />
           </label>
-          
+
           <label className="filter-field">
             <span>To</span>
-            <input 
-                type="date" 
-                value={dateRange.end} 
-                onChange={(event) => setDateRange(prev => ({ ...prev, end: event.target.value }))}
-                style={{ fontFamily: 'inherit' }} 
+            <input
+              type="date"
+              value={dateRange.end}
+              onChange={(event) => setDateRange(prev => ({ ...prev, end: event.target.value }))}
+              style={{ fontFamily: 'inherit' }}
             />
           </label>
+
+          <div className="filter-field">
+            <span style={{ visibility: 'hidden' }}>Action</span>
+            <button
+              type="button"
+              className="filter-clear-btn"
+              onClick={handleClearFilters}
+              title="Clear all skills and interests from your profile"
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
 
         <div className="opportunities-list">
+          {!showAllOpportunities && hasCompletedQuiz && (
+            <h2 className="opportunities-section-title">Recommended opportunities based on your interests and skills</h2>
+          )}
           {filteredOpportunities.length ? (
-            filteredOpportunities.map((opportunity) => (
-              <OpportunityCard
-                key={opportunity.id}
-                opportunity={opportunity}
-                onApply={onApply}
-                isFavorite={favorites.includes(opportunity.id)}
-                onToggleFavorite={handleToggleFavorite}
-                onOpen={() => navigate(`/opportunities/${opportunity.id}`)}
-              />
-            ))
+            <>
+              {(showAllOpportunities || !hasCompletedQuiz ? filteredOpportunities : filteredOpportunities.slice(0, 6)).map((opportunity) => (
+                <OpportunityCard
+                  key={opportunity.id}
+                  opportunity={opportunity}
+                  onApply={onApply}
+                  isFavorite={favorites.includes(opportunity.id)}
+                  onToggleFavorite={handleToggleFavorite}
+                  onOpen={() => navigate(`/opportunities/${opportunity.id}`)}
+                />
+              ))}
+              {!showAllOpportunities && hasCompletedQuiz && filteredOpportunities.length > 6 && (
+                <div className="opportunities-see-all-container">
+                  <button
+                    type="button"
+                    className="opportunities-see-all-btn"
+                    onClick={() => setShowAllOpportunities(true)}
+                  >
+                    See all opportunities
+                  </button>
+                </div>
+              )}
+              {showAllOpportunities && hasCompletedQuiz && filteredOpportunities.length > 6 && (
+                <div className="opportunities-see-all-container">
+                  <button
+                    type="button"
+                    className="opportunities-see-all-btn"
+                    onClick={() => {
+                      setShowAllOpportunities(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
+                    Show top 6 recommendations
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <p className="opportunities-empty">No opportunities match your filters right now.</p>
           )}
         </div>
-        <QuizModal 
+        <QuizModal
           show={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onComplete={onQuizComplete} // This passes the tags up to App.jsx
+          onComplete={onQuizComplete}
         />
       </section>
       <div className={`snackbar${snackbarVisible ? ' visible' : ''}`} role="status" aria-live="polite">

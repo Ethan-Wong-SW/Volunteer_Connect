@@ -40,8 +40,8 @@ header {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  position: sticky;
-  top: 0;
+  /* position: sticky; <-- Removed sticky positioning */
+  /* top: 0; */
   z-index: 100;
 }
 
@@ -359,5 +359,11 @@ input[type='text'] {
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.opportunities-see-all-btn:hover {
+  background-color: #43a047;
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.35);
+  transform: translateY(-2px);
 }

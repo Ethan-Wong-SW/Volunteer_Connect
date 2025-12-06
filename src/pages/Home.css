@@ -88,6 +88,12 @@
   font-weight: 600;
   background: #ffffff;
   box-shadow: 0 8px 20px rgba(76, 175, 80, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(76, 175, 80, 0.25);
 }
 
 .home-favorite-card .opportunity-card__badge {

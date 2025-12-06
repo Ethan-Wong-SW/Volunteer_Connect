@@ -155,14 +155,23 @@
 }
 
 .opportunity-detail-card__button--outline {
-  background: #ffeef6;
-  color: #d23d7a;
+  background: #e6f7ed;
+  color: #008751;
+}
+
+.opportunity-detail-card__button--outline:hover {
+  background: #d9f2e3;
 }
 
 .opportunity-detail-card__button--primary {
-  background: #ff7bb4;
-  color: #fff;
-  box-shadow: 0 15px 30px rgba(255, 123, 180, 0.35);
+  background: linear-gradient(120deg, #2f6b34 0%, #3f8d43 100%);
+  color: #ffffff;
+  border: 1px solid #2f6b34;
+  box-shadow: 0 14px 35px rgba(63, 141, 67, 0.22);
+}
+
+.opportunity-detail-card__button--primary:hover {
+  background: linear-gradient(120deg, #2c6130 0%, #36793c 100%);
 }
 
 @media (max-width: 640px) {
@@ -189,21 +198,21 @@
   height: 40px;
   border-radius: 50%;
   border: none;
-  background: radial-gradient(circle at 30% 30%, #fff5f8 0%, #ffe9f0 55%, #ffd6e0 100%);
+  background: #e6f7ed;
   cursor: pointer;
   font-size: 1.55rem;
-  color: #111111;
+  color: #008751;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 28px rgba(228, 90, 122, 0.22);
-  transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: none;
+  transition: background-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
 }
 
 .opportunity-detail-favorite:hover {
   transform: scale(1.07);
+  background: #d9f2e3;
   color: #ff3366;
-  box-shadow: 0 12px 32px rgba(228, 90, 122, 0.28);
 }
 
 .opportunity-detail-favorite.active {
