@@ -2,11 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  background: linear-gradient(135deg, #f4fff4 0%, #e9f2ea 50%, #ffffff 100%);
-  border: 1px solid #dfe6dd;
-  border-radius: 26px;
   padding: clamp(1.5rem, 4vw, 3rem);
-  box-shadow: 0 25px 60px rgba(76, 175, 80, 0.15);
 }
 
 .opportunities-hero {
@@ -15,13 +11,14 @@
   gap: 0.75rem;
   align-items: center;
   text-align: center;
+  border-radius: 24px;
 }
 
 .opportunities-hero .link-button {
   align-self: flex-start;
   background: none;
   border: none;
-  color: #4caf50;
+  color: var(--theme-color-4);
   font-weight: 600;
   font-size: 1rem;
   padding: 0.4rem 0.75rem;
@@ -31,7 +28,7 @@
 }
 
 .opportunities-hero .link-button:hover {
-  background-color: rgba(76, 175, 80, 0.12);
+  background-color: rgba(174, 199, 118, 0.12);
 }
 
 .opportunities-hero h1 {
@@ -51,7 +48,7 @@
   text-transform: uppercase;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #4caf50;
+  color: var(--theme-color-4);
 }
 
 .opportunities-list {
@@ -300,9 +297,9 @@
 /* --- Add to src/pages/Opportunities.css --- */
 
 .quiz-callout {
-  background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #f9fdf9 0%, #ffffff 100%);
   border: 1px solid #c8e6c9;
-  border-left: 5px solid #4caf50; /* Accent bar to draw attention */
+  border-left: 5px solid var(--theme-color-4); /* Accent bar to draw attention */
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -311,13 +308,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 8px 20px rgba(174, 199, 118, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .quiz-callout:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(76, 175, 80, 0.15);
+  box-shadow: 0 12px 25px rgba(174, 199, 118, 0.15);
 }
 
 .quiz-callout__content {
@@ -352,8 +349,8 @@
 }
 
 .quiz-callout__button {
-  background-color: #4caf50;
-  color: white;
+  background-color: var(--theme-color-4);
+  color: #2f3c2f;
   font-weight: 600;
   font-size: 1rem;
   padding: 0.85rem 2rem;
@@ -361,13 +358,13 @@
   border-radius: 50px;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 12px rgba(174, 199, 118, 0.3);
   transition: all 0.2s ease;
 }
 
 .quiz-callout__button:hover {
-  background-color: #43a047;
-  box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+  background-color: var(--theme-color-3);
+  box-shadow: 0 6px 15px rgba(174, 199, 118, 0.4);
   transform: scale(1.02);
 }
 

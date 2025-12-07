@@ -67,8 +67,8 @@
 .modal-button {
   margin-top: 20px;
   padding: 12px 15px;
-  background-color: #4caf50;
-  color: white;
+  background-color: var(--theme-color-4);
+  color: #2f3c2f;
   border: none;
   border-radius: 14px;
   cursor: pointer;

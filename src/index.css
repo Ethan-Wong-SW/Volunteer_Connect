@@ -1,5 +1,9 @@
 :root {
   --header-height: 110px;
+  --theme-color-1: #CCE24D;
+  --theme-color-2: #C0DA5B;
+  --theme-color-3: #B5D168;
+  --theme-color-4: #AEC776;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -16,7 +20,9 @@
 
 body {
   margin: 0;
-  background-color: #f4fff4;
+  background: linear-gradient(to bottom, var(--theme-color-1), var(--theme-color-2), var(--theme-color-3), var(--theme-color-4));
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 #root {
@@ -163,9 +169,9 @@ header h1 {
 }
 
 .header-menu a.active {
-  color: #4caf50;
-  border-color: #4caf50;
-  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.18);
+  color: var(--theme-color-4);
+  border-color: var(--theme-color-4);
+  box-shadow: 0 8px 20px rgba(174, 199, 118, 0.18);
 }
 
 .sign-out {
@@ -179,16 +185,16 @@ header h1 {
 }
 
 .header-sign-out {
-  background: linear-gradient(120deg, #2f6b34 0%, #3f8d43 100%);
-  color: #ffffff;
-  border-color: #2f6b34;
-  box-shadow: 0 14px 35px rgba(63, 141, 67, 0.22);
+  background: linear-gradient(120deg, var(--theme-color-3) 0%, var(--theme-color-4) 100%);
+  color: #2f3c2f;
+  border-color: var(--theme-color-4);
+  box-shadow: 0 14px 35px rgba(174, 199, 118, 0.22);
 }
 
 .header-sign-out:hover,
 .header-sign-out:focus-visible {
-  background: linear-gradient(120deg, #2c6130 0%, #36793c 100%);
-  box-shadow: 0 16px 38px rgba(63, 141, 67, 0.26);
+  background: linear-gradient(120deg, var(--theme-color-2) 0%, var(--theme-color-3) 100%);
+  box-shadow: 0 16px 38px rgba(174, 199, 118, 0.26);
   outline: none;
 }
 
@@ -235,17 +241,18 @@ footer {
 }
 
 button {
-  background-color: #4caf50;
-  color: #ffffff;
+  background-color: var(--theme-color-4);
+  color: #2f3c2f;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
+  font-weight: 600;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: var(--theme-color-3);
 }
 
 form {
@@ -351,8 +358,8 @@ input[type='text'] {
 .opportunities-see-all-btn {
   width: 300px;
   display: block;
-  background-color: #4caf50;
-  color: #ffffff;
+  background-color: var(--theme-color-4);
+  color: #2f3c2f;
   border: none;
   padding: 0.85rem 2rem;
   border-radius: 50px;
@@ -363,7 +370,7 @@ input[type='text'] {
 }
 
 .opportunities-see-all-btn:hover {
-  background-color: #43a047;
-  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.35);
+  background-color: var(--theme-color-3);
+  box-shadow: 0 8px 20px rgba(174, 199, 118, 0.35);
   transform: translateY(-2px);
 }

@@ -2,7 +2,7 @@
   min-height: 100vh;
   width: 100%;
   padding: 3rem 1rem;
-  background: linear-gradient(135deg, #f4fff4 0%, #e9f2ea 35%, #ffffff 100%);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,7 +13,7 @@
   background-color: #ffffff;
   border: 1px solid #dfe6dd;
   border-radius: 12px;
-  box-shadow: 0 25px 60px rgba(76, 175, 80, 0.15);
+  box-shadow: 0 25px 60px rgba(174, 199, 118, 0.15);
   padding: 2.5rem 2rem;
   display: flex;
   flex-direction: column;
@@ -29,7 +29,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 700;
-  color: #4caf50;
+  color: var(--theme-color-4);
   margin: 0 0 0.5rem;
 }
 
@@ -70,8 +70,8 @@
 }
 
 .login-input:focus {
-  border-color: #4caf50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+  border-color: var(--theme-color-4);
+  box-shadow: 0 0 0 3px rgba(174, 199, 118, 0.15);
   outline: none;
 }
 
