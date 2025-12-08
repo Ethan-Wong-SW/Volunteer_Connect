@@ -1,6 +1,6 @@
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import './OpportunityDetail.css';
+import './FavouritesDetail.css';
 import { allOpportunities } from '../../data/opportunities';
 import cardArtwork from '../../assets/43180.jpg';
 
@@ -18,7 +18,7 @@ const normalizeFavoriteId = (value) => {
   return Number.isNaN(asNumber) ? value : asNumber;
 };
 
-const OpportunityDetail = ({ onApply }) => {
+const FavouritesDetail = ({ onApply }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const opportunity = allOpportunities.find((item) => String(item.id) === id);
@@ -35,7 +35,7 @@ const OpportunityDetail = ({ onApply }) => {
   const snackbarTimerRef = useRef(null);
 
   if (!opportunity) {
-    return <Navigate to="/opportunities" replace />;
+    return <Navigate to="/favorites" replace />;
   }
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const OpportunityDetail = ({ onApply }) => {
   };
 
   const handleViewReviews = () => {
-    navigate(`/opportunities/${opportunity.id}/reviews`);
+    navigate(`/favorites/${opportunity.id}/reviews`);
   };
 
   const dateLabel = formatStartDate(opportunity.startDate || opportunity.date);
@@ -96,8 +96,8 @@ const OpportunityDetail = ({ onApply }) => {
   return (
     <>
       <section className="opportunity-detail-shell">
-        <button type="button" className="opportunity-detail__back" onClick={() => navigate('/opportunities')}>
-          ← Back to opportunities
+        <button type="button" className="opportunity-detail__back" onClick={() => navigate('/favorites')}>
+          ← Back to favourites
         </button>
 
         <article className="opportunity-detail-card">
@@ -174,4 +174,4 @@ const OpportunityDetail = ({ onApply }) => {
   );
 };
 
-export default OpportunityDetail;
+export default FavouritesDetail;

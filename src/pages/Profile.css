@@ -2,11 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  background: linear-gradient(135deg, #f4fff4 0%, #e9f2ea 50%, #ffffff 100%);
-  border: 1px solid #dfe6dd;
-  border-radius: 26px;
   padding: clamp(1.5rem, 4vw, 3rem);
-  box-shadow: 0 25px 60px rgba(76, 175, 80, 0.15);
 }
 
 .profile-hero {
@@ -14,6 +10,7 @@
   flex-direction: column;
   gap: 0.75rem;
   text-align: center;
+  border-radius: 24px;
 }
 
 .profile-hero h1 {
@@ -50,7 +47,7 @@
   border: 1px solid #e2eddf;
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 15px 35px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 15px 35px rgba(174, 199, 118, 0.1);
 }
 
 .profile-card {
@@ -70,7 +67,7 @@
   width: 64px;
   height: 64px;
   border-radius: 18px;
-  border: 1px solid #d5e4d2;
+  border: 1px solid var(--theme-color-4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,7 +78,7 @@
 
 .profile-card__label {
   margin: 0 0 0.25rem;
-  color: #4caf50;
+  color: var(--theme-color-4);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -115,8 +112,8 @@
 }
 
 .calendar-button[aria-pressed='true'] {
-  border-color: #4caf50;
-  box-shadow: 0 12px 25px rgba(76, 175, 80, 0.25);
+  border-color: var(--theme-color-4);
+  box-shadow: 0 12px 25px rgba(174, 199, 118, 0.25);
 }
 
 .calendar-button:hover {
@@ -480,6 +477,37 @@
   color: #e06a6a;
 }
 
+/* New container to hold the Save and Clear buttons */
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+/* The Clear All button style */
+.profile-clear-all {
+  border: 1px solid #e06a6a; /* Red border */
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.7rem 1.25rem;
+  font-weight: 600;
+  color: #e06a6a; /* Red text */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.profile-clear-all:hover {
+  background: #fff5f5; /* Light red background on hover */
+  transform: translateY(-1px);
+}
+
+/* Adjust the existing profile-save to ensure it doesn't stretch oddly */
+.profile-save {
+  align-self: auto; /* Reset the previous 'flex-start' alignment */
+}
 
 @media (max-width: 600px) {
   .profile-card__header {

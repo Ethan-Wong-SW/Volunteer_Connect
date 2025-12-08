@@ -2,11 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  background: linear-gradient(135deg, #f4fff4 0%, #e9f2ea 50%, #ffffff 100%);
-  border: 1px solid #dfe6dd;
-  border-radius: 26px;
   padding: clamp(1.5rem, 4vw, 3rem);
-  box-shadow: 0 25px 60px rgba(76, 175, 80, 0.15);
 }
 
 .opportunities-hero {
@@ -15,13 +11,14 @@
   gap: 0.75rem;
   align-items: center;
   text-align: center;
+  border-radius: 24px;
 }
 
 .opportunities-hero .link-button {
   align-self: flex-start;
   background: none;
   border: none;
-  color: #4caf50;
+  color: var(--theme-color-4);
   font-weight: 600;
   font-size: 1rem;
   padding: 0.4rem 0.75rem;
@@ -31,7 +28,7 @@
 }
 
 .opportunities-hero .link-button:hover {
-  background-color: rgba(76, 175, 80, 0.12);
+  background-color: rgba(174, 199, 118, 0.12);
 }
 
 .opportunities-hero h1 {
@@ -51,7 +48,7 @@
   text-transform: uppercase;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #4caf50;
+  color: var(--theme-color-4);
 }
 
 .opportunities-list {
@@ -77,10 +74,14 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.95); /* Increased opacity for better readability when sticky */
   border: 1px solid #dfe6dd;
   border-radius: 18px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  position: sticky;
+  top: 1rem;
+  z-index: 90;
+  backdrop-filter: blur(8px);
 }
 
 .filter-field {
@@ -162,27 +163,53 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.95);
+  background: radial-gradient(circle at 30% 30%, #fff5f8 0%, #ffe9f0 55%, #ffd6e0 100%);
   cursor: pointer;
-  font-size: 1.1rem;
-  color: #8a93a6;
+  font-size: 1.70rem;
+  color: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 10px 28px rgba(228, 90, 122, 0.22);
+  transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .home-card__favorite:hover {
-  transform: scale(1.05);
-  color: #ff4d6d;
+  transform: scale(1.07);
+  color: #ff3366;
+  box-shadow: 0 12px 32px rgba(228, 90, 122, 0.28);
 }
 
 .home-card__favorite.active {
-  color: #ff4d6d;
+  color: #ff3366;
+}
+
+.snackbar {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translate(-50%, 12px);
+  background: #1f3121;
+  color: #ffffff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 200;
+  min-width: 220px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.snackbar.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .opportunity-card__content {
@@ -248,8 +275,134 @@
   color: #5c6478;
 }
 
+.opportunity-card--clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.opportunity-card--clickable:hover,
+.opportunity-card--clickable:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 38px rgba(17, 52, 95, 0.15);
+  outline: none;
+}
+
+
 @media (max-width: 640px) {
   .opportunity-card__skills {
     width: 100%;
   }
+}
+
+/* --- Add to src/pages/Opportunities.css --- */
+
+.quiz-callout {
+  background: linear-gradient(135deg, #f9fdf9 0%, #ffffff 100%);
+  border: 1px solid #c8e6c9;
+  border-left: 5px solid var(--theme-color-4); /* Accent bar to draw attention */
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  box-shadow: 0 8px 20px rgba(174, 199, 118, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quiz-callout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(174, 199, 118, 0.15);
+}
+
+.quiz-callout__content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1 1 300px; /* Allow it to grow/shrink properly */
+}
+
+.quiz-callout__icon {
+  font-size: 2.5rem;
+  background: #ffffff;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.quiz-callout__text h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  color: #2f3c2f;
+}
+
+.quiz-callout__text p {
+  margin: 0;
+  color: #526052;
+  font-size: 0.95rem;
+}
+
+.quiz-callout__button {
+  background-color: var(--theme-color-4);
+  color: #2f3c2f;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.85rem 2rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(174, 199, 118, 0.3);
+  transition: all 0.2s ease;
+}
+
+.quiz-callout__button:hover {
+  background-color: var(--theme-color-3);
+  box-shadow: 0 6px 15px rgba(174, 199, 118, 0.4);
+  transform: scale(1.02);
+}
+
+/* Mobile adjustment */
+@media (max-width: 600px) {
+  .quiz-callout {
+    flex-direction: column;
+    text-align: center;
+    align-items: stretch;
+  }
+  
+  .quiz-callout__content {
+    flex-direction: column;
+  }
+  
+  .quiz-callout__button {
+    width: 100%;
+  }
+}
+
+.filter-clear-btn {
+  background-color: #fff;
+  color: #d32f2f;
+  border: 1px solid #d32f2f;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.filter-clear-btn:hover {
+  background-color: #ffebee;
+  box-shadow: 0 2px 5px rgba(211, 47, 47, 0.15);
+}
+
+.filter-clear-btn:active {
+  transform: translateY(1px);
 }

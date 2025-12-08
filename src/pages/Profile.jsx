@@ -253,6 +253,15 @@ const Profile = ({ profile, onSave, defaultProfile, onTagsChange }) => {
     setSelectedSkill('');
   };
 
+  // Handler to clear all skills and interests
+  const handleClearAllTags = () => {
+    // Optional: Confirm with user to prevent accidental clicks
+    if (window.confirm('Are you sure you want to remove all interests and skills?')) {
+      setInterests([]);
+      setSkills([]);
+      notifyTagChange([], []); // Update App.jsx immediately
+    }
+  };
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -506,6 +515,23 @@ const Profile = ({ profile, onSave, defaultProfile, onTagsChange }) => {
                 <p className="empty-message">No skills saved. Try the AI quiz on the Discover page!</p>
               )}
             </div>
+          </div>
+          {/* <-- NEW: Button Group for Actions */}
+          <div className="form-actions">
+            {/* <button type="submit" className="profile-save">
+              Save profile
+            </button> */}
+            
+            {/* Only show Clear button if there are actually tags to clear */}
+            {(interests.length > 0 || skills.length > 0) && (
+              <button 
+                type="button" 
+                className="profile-clear-all" 
+                onClick={handleClearAllTags}
+              >
+                Clear all tags
+              </button>
+            )}
           </div>
 
           <button type="submit" className="profile-save">

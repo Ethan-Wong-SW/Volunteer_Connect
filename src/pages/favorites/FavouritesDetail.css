@@ -187,10 +187,10 @@
     justify-content: flex-end;
   }
 
-.opportunity-detail-card__cta-group {
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
+  .opportunity-detail-card__cta-group {
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
 }
 
 .opportunity-detail-favorite {
@@ -218,6 +218,7 @@
 .opportunity-detail-favorite.active {
   color: #ff3366;
 }
+
 .opportunity-detail-snackbar {
   position: fixed;
   left: 50%;

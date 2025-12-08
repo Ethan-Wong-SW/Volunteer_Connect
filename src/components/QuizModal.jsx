@@ -32,7 +32,8 @@ export default function QuizModal({ show, onClose, onComplete }) {
     const combinedDescription = `Interests: ${trimmedInterests} Skills: ${trimmedSkills}`;
 
     try {
-      const response = await fetch('/api/get-tags', {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
+      const response = await fetch(`${apiUrl}/get-tags`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description: combinedDescription }),
